@@ -14,13 +14,13 @@
       </el-table-column>
       <el-table-column prop="price" label="价格" width="100">
         <template slot-scope="scope">
-          <el-input :value="scope.row.price" v-if="showEdit"></el-input>
+          <el-input :value="scope.row.price" v-if="showEdit" v-model="scope.row[scope.column.property]"></el-input>
           <span v-if="!showEdit">{{scope.row.price}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="description" label="描述" width="200">
+      <el-table-column prop="description" label="描述">
         <template slot-scope="scope">
-          <el-input :value="scope.row.description" v-if="showEdit"></el-input>
+          <el-input :value="scope.row.description" v-if="showEdit" v-model="scope.row[scope.column.property]"></el-input>
           <span v-if="!showEdit">{{scope.row.description}}</span>
         </template>
       </el-table-column>
@@ -29,11 +29,7 @@
           <img :src="scope.row.image" class="img-pic" v-if="!showEdit" alt="没有图片">
           <div v-if="showEdit" :key="scope.$index">
             <!-- <input type="file" @change="getFile"> -->
-            <el-input type="text" placeholder="请输入图片地址" @change="showPic(scope.row.image)" value=""></el-input>
-            <span>预览图:</span>
-            <div class="imgwrapper">
-              <img :src="scope.row.image" alt="">
-            </div>
+            <el-input type="text" placeholder="请输入图片地址" @change="showPic(scope.row.image)" v-model="scope.row[scope.column.property]"></el-input>
           </div>
         </template>
       </el-table-column>
@@ -58,21 +54,25 @@ export default {
     }
   },
   methods: {
-   handleClick() {
-     this.showEdit = true
-   },
-   handleFinish() {
-     for (let i in this.tableData) {
-       if (this.tableData[i].name === '' || this.tableData[i].price === '' || this.tableData[i].image === '') {
-         console.log('你的商品信息还没有填完呢')
-         return
-       }
-     }
-     this.showEdit = false
-     console.log('修改成功')
-     //修改成功后上传数据
-   },
-   handleDelete (index, row) {
+    handleClick () {
+      this.showEdit = true
+    },
+    handleFinish () {
+      for (let i in this.tableData) {
+        if (this.tableData[i].name === '' || this.tableData[i].price === '' || this.tableData[i].image === '') {
+          let num = parseInt(i)+1
+          this.$message.error(`你的第${num}个商品还没填写完毕`)
+          return
+        }
+      }
+      this.showEdit = false
+      this.$message({
+          message: '修改成功',
+          type: 'success'
+        });
+      //  修改成功后上传数据
+    },
+    handleDelete (index, row) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -90,27 +90,27 @@ export default {
           message: '已取消删除'
         })
       })
-      //删除完后需要上传一次数据
+      //  删除完后需要上传一次数据
     },
-    addRow(){
+    addRow () {
       let list = {
         "name": "",
         "price": 0,
         "description": "咸粥",
         "image": ""
-        }
-        this.tableData.unshift(list)
-        this.showEdit = true
+      }
+      this.tableData.unshift(list)
+      this.showEdit = true
     },
-//     getFile (e) {
-//       let files = e.target.files
-//       console.log(files)
-//       可以获取到上传内的内容,需要变成base64才可以预览
-//     }
-     showPic (value,pic) {
-       let values = value
-       console.log(values)
-     }
+    //     getFile (e) {
+    //       let files = e.target.files
+    //       console.log(files)
+    //       可以获取到上传内的内容,需要变成base64才可以预览
+    //     }
+    showPic () {
+      let values
+      console.log(values)
+    }
   },
   mounted () {
     axios.get('/api/goods').then(res => {

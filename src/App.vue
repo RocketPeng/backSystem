@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <el-container style="height:100%;border:1px solid #eee">
+    <el-container style="height:100%;border:1px solid #eee" v-show="loginSucc">
       <el-header height="62px">
         <div class="img-wrapper">
           <img src="@/assets/logo.fdb9ad2.png" alt="">
@@ -20,7 +20,7 @@
           <el-row class="tac">
             <el-col>
               <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                <el-menu-item index="2">
+                <el-menu-item index="1">
                   <i class="el-icon-menu"></i>
                   <span slot="title">主页</span>
                 </el-menu-item>
@@ -31,12 +31,29 @@
         <el-container>
           <el-main>
             <div class="content-wrapper">
-              <router-view/>
+              <router-view :adminPage="adminPage"></router-view>
             </div>
           </el-main>
         </el-container>
       </el-container>
     </el-container>
+    <div class="loginBox">
+      <el-dialog title="登 录" :visible.sync="centerDialogVisible" width="30%" center>
+        <span>用户名密码:admin</span>
+        <span>顾客:guest</span>
+        <el-form ref="form" :model="form" label-width="80px">
+          <el-form-item label="用户名">
+            <el-input v-model="form.name"></el-input>
+          </el-form-item>
+          <el-form-item label="密码" prop="pass">
+            <el-input type="password" v-model="form.pass" autocomplete="off"></el-input>
+           </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="login">登 录</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -45,7 +62,26 @@ export default {
   name: 'App',
   data () {
     return {
-      activeIndex: '1'
+      activeIndex: '1',
+      loginSucc: false,
+      centerDialogVisible: true,
+      form: {
+        name: '',
+        pass: ''
+      },
+      userTable: [
+        {
+          userName: 'admin',
+          userPass: 'admin',
+          level: 'admin',
+        },
+        {
+          userName: 'guest',
+          userPass: 'guest',
+          level: 'guest',
+        }
+      ],
+      adminPage: false
     }
   },
   methods: {
@@ -54,6 +90,35 @@ export default {
     },
     handleClose (key, keyPath) {
       console.log(key, keyPath)
+    },
+    login () {
+      if (this.form.name === '' && this.form.pass ===  '' ) {
+        this.$message.error('请输入用户名和密码')
+      } else if (this.form.name === '' ) {
+        this.$message.error('请输入用户名')
+      } else if (this.form.pass ===  '' ) {
+        this.$message.error('请输入密码')
+      } else {
+        this.userTable.forEach(value => {
+          if (value.userPass === this.form.pass && value.userName === this.form.name) {
+            this.centerDialogVisible = false
+            this.loginSucc = true
+              if (value.level === 'admin') {
+                this.adminPage = true
+                this.$message({
+                  message: '登录成功(管理者)',
+                  type: 'success'
+                })
+              } else {
+                this.$message({
+                  message: '登录成功(顾客)',
+                  type: 'success'
+                })
+              }
+            return
+          }
+        })
+      }
     }
   }
 }

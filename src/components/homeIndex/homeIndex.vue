@@ -1,8 +1,10 @@
 <template>
-  <div>
-    <el-button size="mini" type="primary" @click="addRow">添加项目</el-button>
-    <el-button size="mini" type="primary" @click="handleClick" v-if="!showEdit">编辑</el-button>
-    <el-button size="mini" type="primary" @click="handleFinish" v-if="showEdit">完成</el-button>
+  <div class="container">
+    <el-button size="mini" type="primary" @click="addRow" v-if="adminPage">添加项目</el-button>
+    <div v-if="adminPage" class="btn-wrapper">
+      <el-button size="mini" type="primary" @click="handleClick" v-if="!showEdit">编辑</el-button>
+      <el-button size="mini" type="primary" @click="handleFinish" v-if="showEdit">完成</el-button>
+    </div>
     <el-table :data="tableData" style="width: 100%">
         <el-table-column type="index" label="序号" width="50">
       </el-table-column>
@@ -33,24 +35,31 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" width="170">
+      <el-table-column fixed="right" width="170" label="操作" v-if="adminPage">
         <template slot-scope="scope">
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <div class="confirm-btn">
+      <div class="confirm-box create" @click="handleClick" v-if="!showEdit">编辑</div>
+      <div class="confirm-box finish" @click="handleFinish" v-if="showEdit">完成</div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 export default {
+  props:{
+    adminPage : Boolean
+  },
   data () {
     return {
       tableData: [],
       showEdit: false,
       modelInfo: '',
-      showButton: false
+      showButton: false,
     }
   },
   methods: {
@@ -59,17 +68,17 @@ export default {
     },
     handleFinish () {
       for (let i in this.tableData) {
-        if (this.tableData[i].name === '' || this.tableData[i].price === '' || this.tableData[i].image === '') {
-          let num = parseInt(i)+1
+        if (this.tableData[i].name === '' || this.tableData[i].price === '' || this.tableData[i].image === '' ) {
+          let num = parseInt(i) + 1
           this.$message.error(`你的第${num}个商品还没填写完毕`)
           return
         }
       }
       this.showEdit = false
       this.$message({
-          message: '修改成功',
-          type: 'success'
-        });
+        message: '修改成功',
+        type: 'success'
+      })
       //  修改成功后上传数据
     },
     handleDelete (index, row) {
@@ -96,7 +105,7 @@ export default {
       let list = {
         "name": "",
         "price": 0,
-        "description": "咸粥",
+        "description": "",
         "image": ""
       }
       this.tableData.unshift(list)
@@ -122,12 +131,22 @@ export default {
           })
         })
       }
-    })
+    }),
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  unmounted () {
+    window.removeEventListener('scroll', this.handleScroll)
   }
 }
 </script>
 
 <style lang="stylus" scoped>
+  .container{
+    position: relative;
+  }
+  .btn-wrapper{
+    display: inline-block;
+  }
   .img-pic{
     width: 120px;
     height: 120px;
@@ -138,5 +157,21 @@ export default {
   }
   .imgwrapper img{
     width: 100%
+  }
+  .confirm-btn{
+    position: fixed;
+    right: 20px;
+    top: 50%
+    z-index: 100
+    .confirm-box{
+      width: 50px;
+      height: 50px;
+      background: #409EFF;
+      line-height: 50px;
+      text-align: center;
+      border-radius: 10px;
+      color: #fff
+      cursor: pointer
+    }
   }
 </style>

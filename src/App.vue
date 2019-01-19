@@ -99,11 +99,11 @@ export default {
       } else if (this.form.pass ===  '' ) {
         this.$message.error('请输入密码')
       } else {
-        this.userTable.forEach(value => {
-          if (value.userPass === this.form.pass && value.userName === this.form.name) {
+        for (let i in this.userTable){
+          if (this.userTable[i].userPass === this.form.pass && this.userTable[i].userName === this.form.name) {
             this.centerDialogVisible = false
             this.loginSucc = true
-              if (value.level === 'admin') {
+              if (this.userTable[i].level === 'admin') {
                 this.adminPage = true
                 this.$message({
                   message: '登录成功(管理者)',
@@ -116,8 +116,10 @@ export default {
                 })
               }
             return
+          }else if (this.userTable.length-1 === parseInt(i) && this.userTable[i].userPass !== this.form.pass && this.userTable[i].userName !== this.form.name){
+            this.$message.error('用户名或密码错误')
           }
-        })
+        }
       }
     }
   }
